@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PillarTracker - Professional Activity Tracking</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+    .toast.exit {
+      animation: slideOut 0.3s ease-out;
+    }
+  </style>
+</head>
+
+<body class="text-gray-100 font-sans min-h-screen">
+  <div class="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
+
+    <!-- 🔹 HEADER -->
+    <header class="mb-6 sm:mb-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">PillarTracker</h1>
+          <p class="text-gray-400 text-xs sm:text-sm mt-1">Professional Activity Tracking System v0.1</p>
+          <p id="currentDate" class="text-gray-400 text-xs sm:text-sm mt-2"></p>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-4">
+          <div class="text-right">
+            <p class="text-gray-400 text-xs">Today's Progress</p>
+            <div id="statusIndicator" class="text-3xl sm:text-5xl">⚪</div>
+          </div>
+          <button id="settingsBtn" class="p-2 sm:p-3 hover:bg-slate-700 rounded-lg transition text-indigo-400 hover:text-indigo-300">
+            ⚙️
+          </button>
+        </div>
+      </div>
+      <div class="h-1 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"></div>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 sm:gap-6 mb-6 auto-rows-max lg:auto-rows-fr">
+
+      <!-- 🔹 INPUT SECTION (Left Column) -->
+      <section id="inputSection" class="lg:col-span-1 h-full">
+        <div class="bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-700 w-full h-full">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-200 mb-4">Start Activity</h2>
+          
+          <input 
+            id="activityInput"
+            type="text"
+            placeholder="Activity name..."
+            class="w-full mb-3 sm:mb-4 px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-700 border border-slate-600 rounded-lg text-sm sm:text-base text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          />
+
+          <select 
+            id="categorySelect"
+            class="w-full mb-3 sm:mb-4 px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-700 border border-slate-600 rounded-lg text-sm sm:text-base text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          >
+            <option value="">Select Category</option>
+          </select>
+
+          <div class="flex gap-2 mb-3 sm:mb-4">
+            <button 
+              id="startBtn"
+              class="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition transform hover:scale-105 active:scale-95 shadow-lg"
+            >
+              ▶ Start
+            </button>
+            <button 
+              id="addCategoryBtn"
+              class="px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-700 hover:bg-slate-600 text-indigo-400 font-semibold text-sm sm:text-base rounded-lg transition border border-slate-600"
+              title="Add custom category"
+            >
+              +
+            </button>
+          </div>
+
+          <div class="bg-slate-700/50 rounded-lg p-3 sm:p-4 border border-slate-600">
+            <p class="text-xs text-gray-400 mb-3">Quick Stats</p>
+            <div class="space-y-2 text-xs sm:text-sm">
+              <p class="text-gray-300">Today: <span id="todayCount" class="font-semibold text-indigo-400">0</span> activities</p>
+              <p class="text-gray-300">Total Time: <span id="todayTotalTime" class="font-semibold text-emerald-400">0h 0m</span></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 🔹 ACTIVE SESSION (Center/Top) -->
+      <section id="activeSession" class="lg:col-span-2 hidden h-full">
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl border border-indigo-500/30 w-full h-full flex flex-col justify-between">
+          <div class="text-center">
+            <p class="text-gray-400 text-xs sm:text-sm mb-2 uppercase tracking-wide">◉ Currently Running</p>
+            <h2 id="activeTitle" class="text-xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-3 break-words"></h2>
+            <p id="activeCategory" class="text-indigo-400 font-semibold mb-6 sm:mb-8 text-base sm:text-lg"></p>
+
+            <p id="timer" class="text-4xl sm:text-6xl md:text-7xl font-bold font-mono text-indigo-400 mb-6 sm:mb-8 tracking-widest">00:00:00</p>
+
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button id="finishBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 sm:py-4 rounded-lg transition transform hover:scale-105 active:scale-95 text-sm sm:text-base">
+                ✓ Finish
+              </button>
+              <button id="abortBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 sm:py-4 rounded-lg transition transform hover:scale-105 active:scale-95 text-sm sm:text-base">
+                ✕ Abort
+              </button>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs text-center mt-4 sm:mt-6">(Press SPACE to finish, ESC to abort)</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 🔹 DATE NAVIGATION & AUDIT LOG -->
+    <section id="auditSection" class="mb-6">
+      <div class="bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-700">
+        <!-- Date Navigation Header -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-4 border-b border-slate-600">
+          <button id="prevDateBtn" class="p-2 hover:bg-slate-700 rounded-lg transition text-indigo-400 hover:text-indigo-300 text-sm sm:text-base">
+            ← Previous
+          </button>
+          <div class="text-center flex-1 w-full sm:w-auto">
+            <p class="text-xs text-gray-400 mb-2">View Date</p>
+            <input 
+              id="logDateInput" 
+              type="date" 
+              class="bg-slate-700 border border-slate-600 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-base text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer w-full sm:w-auto"
+            />
+          </div>
+          <button id="nextDateBtn" class="p-2 hover:bg-slate-700 rounded-lg transition text-indigo-400 hover:text-indigo-300 text-sm sm:text-base">
+            Next →
+          </button>
+        </div>
+        
+        <!-- Activity Log Content -->
+        <div>
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4">
+            <h2 id="logTitle" class="text-base sm:text-lg font-semibold text-gray-200 break-words"></h2>
+            <div class="flex gap-2 w-full sm:w-auto">
+              <button id="exportBtn" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 text-indigo-400 text-xs sm:text-sm rounded-lg transition border border-slate-600">
+                📥 Export
+              </button>
+              <button id="statsBtn" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 text-indigo-400 text-xs sm:text-sm rounded-lg transition border border-slate-600">
+                📊 Stats
+              </button>
+            </div>
+          </div>
+          
+          <div id="activityList" class="space-y-3">
+            <p class="text-gray-500 text-center py-8">No activities yet</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Modal: Session Recovery -->
+  <div id="recoveryModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-800 rounded-2xl p-4 sm:p-6 max-w-sm w-full border border-slate-700 shadow-2xl">
+      <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">⚠️ Session Recovery</h3>
+      <p class="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">Your previous session is still running. What would you like to do?</p>
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <button id="resumeBtn" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg transition">
+          ▶ Resume
+        </button>
+        <button id="clearSessionBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg transition">
+          🗑️ Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Settings & Custom Categories -->
+  <div id="settingsModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-800 rounded-2xl max-w-2xl w-full border border-slate-700 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <!-- Header -->
+      <div class="sticky top-0 bg-slate-800 border-b border-slate-700 p-4 sm:p-6 flex justify-between items-center">
+        <h3 class="text-xl sm:text-2xl font-bold text-white">Settings</h3>
+        <button id="closeSettingsBtn" class="text-gray-400 hover:text-gray-200 text-xl sm:text-2xl">✕</button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <!-- Categories Management -->
+        <div>
+          <h4 class="text-base sm:text-lg font-semibold text-gray-200 mb-3 sm:mb-4">📋 Activity Categories</h4>
+          
+          <!-- Default Categories -->
+          <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+            <p class="text-xs sm:text-sm text-gray-400 mb-3">Default (7 Pillars)</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="defaultCategoriesList">
+              <!-- Will be populated by JS -->
+            </div>
+          </div>
+
+          <!-- Custom Categories -->
+          <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+            <p class="text-xs sm:text-sm text-gray-400 mb-3">Custom Categories</p>
+            <div class="space-y-2 mb-3 sm:mb-4" id="customCategoriesList">
+              <!-- Will be populated by JS -->
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input 
+                id="newCategoryInput" 
+                type="text" 
+                placeholder="Category name..." 
+                class="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-xs sm:text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button id="addNewCategoryBtn" class="px-3 sm:px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-lg transition whitespace-nowrap">
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="border-t border-slate-600 pt-4 sm:pt-6">
+          <h4 class="text-base sm:text-lg font-semibold text-gray-200 mb-3 sm:mb-4">💾 Data Management</h4>
+          <div class="flex flex-col gap-2 sm:gap-3">
+            <button id="exportAllBtn" class="px-4 py-2 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-base rounded-lg transition w-full">
+              📥 Export All Data (JSON)
+            </button>
+            <button id="clearAllBtn" class="px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base rounded-lg transition w-full">
+              🗑️ Clear All Data
+            </button>
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="border-t border-slate-600 pt-4 sm:pt-6">
+          <h4 class="text-base sm:text-lg font-semibold text-gray-200 mb-2">ℹ️ About</h4>
+          <p class="text-xs sm:text-sm text-gray-400">
+            <strong>PillarTracker v0.1</strong> - Professional Activity Tracking System<br>
+            Created by Mario Juliano Subagiyo<br>
+            Last updated: May 6, 2026
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="border-t border-slate-600 p-3 sm:p-4 flex justify-end gap-2">
+        <button id="settingsCloseBtn" class="px-4 sm:px-6 py-2 bg-slate-700 hover:bg-slate-600 text-gray-200 text-sm sm:text-base rounded-lg transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Statistics -->
+  <div id="statsModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-800 rounded-2xl max-w-2xl w-full border border-slate-700 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <!-- Header -->
+      <div class="sticky top-0 bg-slate-800 border-b border-slate-700 p-4 sm:p-6 flex justify-between items-center">
+        <h3 class="text-xl sm:text-2xl font-bold text-white">📊 Statistics</h3>
+        <button id="closeStatsBtn" class="text-gray-400 hover:text-gray-200 text-xl sm:text-2xl">✕</button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-4 sm:p-6 space-y-4 sm:space-y-6" id="statsContent">
+        <!-- Will be populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer"></div>
+
+  <!-- JS -->
+  <script src="app.js"></script>
+
+</body>
+</html>

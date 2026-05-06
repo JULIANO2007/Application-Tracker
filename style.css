@@ -1,0 +1,184 @@
+/* ======================== RESPONSIVE MOBILE OPTIMIZATIONS ======================== */
+
+/* Mobile-first approach for better responsiveness */
+@media (max-width: 640px) {
+  /* Increase touch target sizes */
+  button {
+    min-height: 44px;
+  }
+
+  input,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Toast notifications positioning for mobile */
+  .toast {
+    position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
+    left: 10px !important;
+    max-width: calc(100% - 20px) !important;
+    z-index: 1000;
+  }
+
+  /* Ensure proper spacing in small containers */
+  .space-y-3 > * + * {
+    margin-top: 0.75rem;
+  }
+
+  /* Better readability for activity items */
+  .activity-item {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Tablet optimization */
+@media (min-width: 641px) and (max-width: 1024px) {
+  input,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Desktop optimization */
+@media (min-width: 1025px) {
+  /* Full width layout looks better on desktop */
+  .max-w-7xl {
+    max-width: 1400px;
+  }
+}
+
+/* ======================== ACCESSIBILITY & GENERAL IMPROVEMENTS ======================== */
+
+/* Focus visible for keyboard navigation */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: background-color, border-color, color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Better text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent layout shift */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ======================== LAYOUT IMPROVEMENTS ======================== */
+
+/* Ensure full width input sections */
+#inputSection .bg-slate-800 {
+  width: 100%;
+}
+
+/* Activity list item styling */
+.activity-item {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  background-color: rgba(51, 65, 85, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  word-break: break-word;
+}
+
+.activity-item-title {
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.activity-item-category {
+  font-size: 0.875rem;
+  color: #a78bfa;
+}
+
+.activity-item-duration {
+  font-size: 0.875rem;
+  color: #86efac;
+  font-weight: 500;
+}
+
+/* ======================== ANIMATIONS ======================== */
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.toast {
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast.exit {
+  animation: slideOut 0.3s ease-out;
+}
+
+/* ======================== SCROLLBAR STYLING ======================== */
+
+/* Custom scrollbar for better appearance */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-color: rgba(99, 102, 241, 0.5) rgba(30, 41, 59, 0.5);
+  scrollbar-width: thin;
+}
