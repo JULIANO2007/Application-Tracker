@@ -131,12 +131,19 @@ const todayCount = document.getElementById("todayCount");
 const todayTotalTime = document.getElementById("todayTotalTime");
 const toastContainer = document.getElementById("toastContainer");
 
-let viewingDate = new Date().toISOString().split("T")[0];
+let viewingDate = "";
 let timerInterval = null;
 
 // =====================================================
 // UTILITY FUNCTIONS
 // =====================================================
+
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 function formatTime(ms) {
   const totalSeconds = Math.floor(ms / 1000);
@@ -275,7 +282,7 @@ function exitActiveMode() {
   timerEl.textContent = "00:00:00";
   activityInput.value = "";
   categorySelect.value = "";
-  viewingDate = new Date().toISOString().split("T")[0];
+  viewingDate = getLocalDateString();
   logDateInput.value = viewingDate;
 }
 
@@ -284,7 +291,7 @@ function exitActiveMode() {
 // =====================================================
 
 function updateStatusIndicator() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
   const todayActivities = getActivities().filter(
     a => a.date === today && a.status === "finished"
   );
@@ -300,7 +307,7 @@ function updateStatusIndicator() {
 }
 
 function updateQuickStats() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
   const todayActivities = getActivities().filter(
     a => a.date === today && a.status === "finished"
   );
@@ -382,7 +389,7 @@ function renderActivities(dateToShow = null) {
 
   if (displayActivities.length === 0) {
     activityList.innerHTML = '<p class="text-gray-500 text-center py-8">No activities for this date</p>';
-    if (displayDate === new Date().toISOString().split("T")[0]) {
+    if (displayDate === getLocalDateString()) {
       updateStatusIndicator();
       updateQuickStats();
     }
@@ -414,7 +421,7 @@ function renderActivities(dateToShow = null) {
     activityList.appendChild(item);
   });
 
-  if (displayDate === new Date().toISOString().split("T")[0]) {
+  if (displayDate === getLocalDateString()) {
     updateStatusIndicator();
     updateQuickStats();
   }
@@ -430,7 +437,7 @@ function createActivity(title, category) {
     title,
     category,
     status: "active",
-    date: new Date().toISOString().split("T")[0],
+    date: getLocalDateString(),
     startTime: Date.now(),
     endTime: null,
     duration: null
@@ -501,7 +508,7 @@ function finishActivity() {
   clearActiveSession();
 
   exitActiveMode();
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
   renderActivities(today);
   showToast(`Finished: ${activity.title} (${formatDuration(duration)})`, "success");
 }
@@ -537,7 +544,7 @@ activityList.addEventListener("click", (e) => {
 prevDateBtn.addEventListener("click", () => {
   const current = new Date(viewingDate);
   current.setDate(current.getDate() - 1);
-  viewingDate = current.toISOString().split("T")[0];
+  viewingDate = getLocalDateString(current);
   logDateInput.value = viewingDate;
   renderActivities(viewingDate);
 });
@@ -545,7 +552,7 @@ prevDateBtn.addEventListener("click", () => {
 nextDateBtn.addEventListener("click", () => {
   const current = new Date(viewingDate);
   current.setDate(current.getDate() + 1);
-  viewingDate = current.toISOString().split("T")[0];
+  viewingDate = getLocalDateString(current);
   logDateInput.value = viewingDate;
   renderActivities(viewingDate);
 });
@@ -642,7 +649,7 @@ exportAllBtn.addEventListener("click", () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `PillarTracker-backup-${new Date().toISOString().split("T")[0]}.json`;
+  a.download = `PillarTracker-backup-${getLocalDateString()}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showToast("All data exported", "success");
@@ -683,7 +690,7 @@ function initializeApp() {
   setCurrentDate();
   populateCategorySelect();
   
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
   viewingDate = today;
   logDateInput.value = today;
 
