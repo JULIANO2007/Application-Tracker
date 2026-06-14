@@ -130,9 +130,19 @@ const exportBtn = document.getElementById("exportBtn");
 const todayCount = document.getElementById("todayCount");
 const todayTotalTime = document.getElementById("todayTotalTime");
 const toastContainer = document.getElementById("toastContainer");
+const descriptionInput = document.getElementById("descriptionInput");
+const editModal = document.getElementById("editModal");
+const closeEditModalBtn = document.getElementById("closeEditModal");
+const editActivityTitle = document.getElementById("editActivityTitle");
+const editCategorySelect = document.getElementById("editCategorySelect");
+const editDescriptionInput = document.getElementById("editDescriptionInput");
+const editTimeInfo = document.getElementById("editTimeInfo");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+const saveEditBtn = document.getElementById("saveEditBtn");
 
 let viewingDate = "";
 let timerInterval = null;
+let editingActivityId = null;
 
 // =====================================================
 // UTILITY FUNCTIONS
@@ -209,6 +219,17 @@ function populateCategorySelect() {
   });
 }
 
+function populateEditCategorySelect() {
+  const categories = getAllCategories();
+  editCategorySelect.innerHTML = '<option value="">Select Category</option>';
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    editCategorySelect.appendChild(option);
+  });
+}
+
 function updateCategoriesUI() {
   defaultCategoriesList.innerHTML = DEFAULT_CATEGORIES
     .map(cat => `<span class="px-3 py-1 bg-slate-600 rounded text-sm text-gray-200">${cat}</span>`)
@@ -235,6 +256,7 @@ function updateCategoriesUI() {
           saveCustomCategories(custom);
           updateCategoriesUI();
           populateCategorySelect();
+          populateEditCategorySelect();
           showToast(`Category "${category}" deleted`, "success");
         }
       });
@@ -282,6 +304,7 @@ function exitActiveMode() {
   timerEl.textContent = "00:00:00";
   activityInput.value = "";
   categorySelect.value = "";
+  descriptionInput.value = "";
   viewingDate = getLocalDateString();
   logDateInput.value = viewingDate;
 }
@@ -411,10 +434,16 @@ function renderActivities(dateToShow = null) {
           </div>
           <p class="activity-item-duration">⏱ ${formatClock(activity.startTime)} - ${formatClock(activity.endTime)}</p>
           <p class="text-xs text-indigo-400 font-semibold mt-1">Durasi: ${formatDuration(activity.duration)}</p>
+          ${activity.description ? `<p class="text-xs text-gray-400 mt-2 break-words">📝 ${activity.description}</p>` : ""}
         </div>
-        <button class="deleteBtn text-red-400 hover:text-red-300 hover:bg-red-900/30 px-2.5 py-1.5 rounded transition flex-shrink-0 text-sm sm:text-base" data-id="${activity.id}" title="Delete activity">
-          🗑️
-        </button>
+        <div class="flex gap-2 flex-shrink-0">
+          <button class="editBtn text-blue-400 hover:text-blue-300 hover:bg-blue-900/30 px-2.5 py-1.5 rounded transition text-sm sm:text-base" data-id="${activity.id}" title="Edit activity">
+            ✏️
+          </button>
+          <button class="deleteBtn text-red-400 hover:text-red-300 hover:bg-red-900/30 px-2.5 py-1.5 rounded transition text-sm sm:text-base" data-id="${activity.id}" title="Delete activity">
+            🗑️
+          </button>
+        </div>
       </div>
     `;
 
@@ -431,16 +460,19 @@ function renderActivities(dateToShow = null) {
 // ACTIVITY CREATION
 // =====================================================
 
-function createActivity(title, category) {
+function createActivity(title, category, description = "") {
   return {
     id: Date.now(),
     title,
     category,
+    description: description.trim(),
     status: "active",
     date: getLocalDateString(),
     startTime: Date.now(),
     endTime: null,
-    duration: null
+    duration: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 }
 
@@ -451,6 +483,7 @@ function createActivity(title, category) {
 startBtn.addEventListener("click", () => {
   const title = activityInput.value.trim();
   const category = categorySelect.value;
+  const description = descriptionInput.value.trim();
 
   if (!title) {
     showToast("Please enter an activity name", "warning");
@@ -467,7 +500,7 @@ startBtn.addEventListener("click", () => {
     return;
   }
 
-  const activity = createActivity(title, category);
+  const activity = createActivity(title, category, description);
   setActiveSession(activity);
   enterActiveMode(activity);
   showToast(`Started: ${title}`, "success");
@@ -538,6 +571,9 @@ activityList.addEventListener("click", (e) => {
       renderActivities(viewingDate);
       showToast(`Deleted: ${activity?.title}`, "success");
     }
+  } else if (e.target.classList.contains("editBtn")) {
+    const id = parseInt(e.target.getAttribute("data-id"));
+    openEditModal(id);
   }
 });
 
@@ -563,10 +599,78 @@ logDateInput.addEventListener("change", (e) => {
 });
 
 // =====================================================
+// EDIT ACTIVITY FUNCTIONS
+// =====================================================
+
+function openEditModal(activityId) {
+  const activities = getActivities();
+  const activity = activities.find(a => a.id === activityId);
+
+  if (!activity) {
+    showToast("Activity not found", "error");
+    return;
+  }
+
+  editingActivityId = activityId;
+  editActivityTitle.value = activity.title;
+  editCategorySelect.value = activity.category;
+  editDescriptionInput.value = activity.description || "";
+  
+  const timeString = `${formatClock(activity.startTime)} - ${formatClock(activity.endTime)} (${formatDuration(activity.duration)})`;
+  editTimeInfo.textContent = timeString;
+
+  editModal.classList.remove("hidden");
+}
+
+function saveEditActivity() {
+  if (!editingActivityId) return;
+
+  const title = editActivityTitle.value.trim();
+  const category = editCategorySelect.value;
+  const description = editDescriptionInput.value.trim();
+
+  if (!title) {
+    showToast("Activity name cannot be empty", "warning");
+    return;
+  }
+
+  if (!category) {
+    showToast("Please select a category", "warning");
+    return;
+  }
+
+  const activities = getActivities();
+  const activityIndex = activities.findIndex(a => a.id === editingActivityId);
+
+  if (activityIndex !== -1) {
+    activities[activityIndex].title = title;
+    activities[activityIndex].category = category;
+    activities[activityIndex].description = description;
+    activities[activityIndex].updatedAt = new Date().toISOString();
+    
+    saveActivities(activities);
+    closeEditModal();
+    renderActivities(viewingDate);
+    showToast("Activity updated successfully", "success");
+  }
+}
+
+function closeEditModal() {
+  editModal.classList.add("hidden");
+  editingActivityId = null;
+  editActivityTitle.value = "";
+  editCategorySelect.value = "";
+  editDescriptionInput.value = "";
+  editTimeInfo.textContent = "";
+}
+
+// =====================================================
 // EVENT LISTENERS - SETTINGS & MODALS
 // =====================================================
 
 settingsBtn.addEventListener("click", () => {
+  populateCategorySelect();
+  populateEditCategorySelect();
   updateCategoriesUI();
   settingsModal.classList.remove("hidden");
 });
@@ -591,6 +695,7 @@ addNewCategoryBtn.addEventListener("click", () => {
   saveCustomCategories(customCats);
   newCategoryInput.value = "";
   populateCategorySelect();
+  populateEditCategorySelect();
   updateCategoriesUI();
   showToast(`Category "${name}" added`, "success");
 });
@@ -637,6 +742,10 @@ statsBtn.addEventListener("click", () => {
 });
 
 closeStatsBtn.addEventListener("click", () => statsModal.classList.add("hidden"));
+
+closeEditModalBtn.addEventListener("click", closeEditModal);
+cancelEditBtn.addEventListener("click", closeEditModal);
+saveEditBtn.addEventListener("click", saveEditActivity);
 
 exportAllBtn.addEventListener("click", () => {
   const data = {
@@ -689,6 +798,7 @@ function setCurrentDate() {
 function initializeApp() {
   setCurrentDate();
   populateCategorySelect();
+  populateEditCategorySelect();
   
   const today = getLocalDateString();
   viewingDate = today;

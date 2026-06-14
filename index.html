@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PillarTracker - Professional Activity Tracking</title>
+<<<<<<< HEAD
 <link rel="icon" type="image/png" href="logo.png">
+=======
+  <link rel="icon" type="image/x-icon" href="logo.png">
+
+>>>>>>> 6021cbc (v0.2 add activity description and edit feature)
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -52,7 +57,7 @@
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4">
         <div>
           <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">PillarTracker</h1>
-          <p class="text-gray-400 text-xs sm:text-sm mt-1">Professional Activity Tracking System v0.1</p>
+          <p class="text-gray-400 text-xs sm:text-sm mt-1">Professional Activity Tracking System v0.2</p>
           <p id="currentDate" class="text-gray-400 text-xs sm:text-sm mt-2"></p>
         </div>
         <div class="flex items-center gap-2 sm:gap-4">
@@ -89,6 +94,12 @@
           >
             <option value="">Select Category</option>
           </select>
+
+          <textarea 
+            id="descriptionInput"
+            placeholder="Add notes/description (optional)..."
+            class="w-full mb-3 sm:mb-4 px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-700 border border-slate-600 rounded-lg text-sm sm:text-base text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition resize-none h-20 sm:h-24"
+          ></textarea>
 
           <div class="flex gap-2 mb-3 sm:mb-4">
             <button 
@@ -261,9 +272,9 @@
         <div class="border-t border-slate-600 pt-4 sm:pt-6">
           <h4 class="text-base sm:text-lg font-semibold text-gray-200 mb-2">ℹ️ About</h4>
           <p class="text-xs sm:text-sm text-gray-400">
-            <strong>PillarTracker v0.1</strong> - Professional Activity Tracking System<br>
+            <strong>PillarTracker v0.2</strong> - Professional Activity Tracking System<br>
             Created by Mario Juliano Subagiyo<br>
-            Last updated: May 6, 2026
+            Last updated: June 14, 2026
           </p>
         </div>
       </div>
@@ -289,6 +300,68 @@
       <!-- Content -->
       <div class="p-4 sm:p-6 space-y-4 sm:space-y-6" id="statsContent">
         <!-- Will be populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Activity -->
+  <div id="editModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-800 rounded-2xl max-w-md w-full border border-slate-700 shadow-2xl">
+      <!-- Header -->
+      <div class="border-b border-slate-700 p-4 sm:p-6 flex justify-between items-center">
+        <h3 class="text-lg sm:text-xl font-bold text-white">✏️ Edit Activity</h3>
+        <button id="closeEditModal" class="text-gray-400 hover:text-gray-200 text-xl sm:text-2xl">✕</button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-4 sm:p-6 space-y-3 sm:space-y-4">
+        <!-- Activity Name -->
+        <div>
+          <label class="text-xs sm:text-sm text-gray-400 mb-2 block">Activity Name</label>
+          <input 
+            id="editActivityTitle"
+            type="text"
+            placeholder="Activity name..."
+            class="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-700 border border-slate-600 rounded-lg text-sm sm:text-base text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          />
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label class="text-xs sm:text-sm text-gray-400 mb-2 block">Category</label>
+          <select 
+            id="editCategorySelect"
+            class="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-700 border border-slate-600 rounded-lg text-sm sm:text-base text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          >
+            <option value="">Select Category</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="text-xs sm:text-sm text-gray-400 mb-2 block">Description</label>
+          <textarea 
+            id="editDescriptionInput"
+            placeholder="Add notes/description (optional)..."
+            class="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-700 border border-slate-600 rounded-lg text-sm sm:text-base text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition resize-none h-20 sm:h-24"
+          ></textarea>
+        </div>
+
+        <!-- Time Info (Read-only) -->
+        <div class="bg-slate-700/30 p-3 sm:p-4 rounded-lg border border-slate-600">
+          <p class="text-xs text-gray-400 mb-2">Timestamp (cannot be edited)</p>
+          <p class="text-xs sm:text-sm text-gray-300" id="editTimeInfo"></p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="border-t border-slate-700 p-3 sm:p-4 flex justify-end gap-2">
+        <button id="cancelEditBtn" class="px-3 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 text-gray-200 text-sm sm:text-base rounded-lg transition">
+          Cancel
+        </button>
+        <button id="saveEditBtn" class="px-3 sm:px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm sm:text-base rounded-lg transition">
+          💾 Save
+        </button>
       </div>
     </div>
   </div>
